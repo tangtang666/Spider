@@ -15,7 +15,7 @@ def main():
             'class': 'card-img-top m-0 p-0 embed-responsive-item rounded'})
     # res_url = soup.select('img')
     # print(res_url)
-    for i in range(len(res_url) + 1):
+    for i in range(len(res_url)):
         img_url = res_url[i]['src']
         filename = img_url.split('/')[-1]
         image = requests.get(img_url, headers=ua).content
