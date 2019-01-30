@@ -19,11 +19,10 @@ def main():
         img_url = res_url[i]['src']
         filename = img_url.split('/')[-1]
         image = requests.get(img_url, headers=ua).content
+        save_image(i, filename, image)
 
-        sava_image(i, filename, image)
 
-
-def sava_image(i, filename, image):
+def save_image(i, filename, image):
     path = 'D:/images2'
     print('正在保存第' + str(i) + '张')
     if not os.path.exists(path):
