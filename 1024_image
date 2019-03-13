@@ -1,0 +1,89 @@
+import requests
+import os
+from bs4 import BeautifulSoup as bs
+
+file_path = r'D:/image'
+
+
+
+class Spider():
+    def __init__(self):
+        self.url = '回家地址/thread0806.php?fid=16&search=&page='
+        self.url1 = '回家地址'
+        self.ua_header = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.80 Safari/537.36'}
+        self.begin_page = int(input('请输入起始页码:'))
+        self.end_page = int(input('请输入结束页码:'))
+
+    # 处理链接
+    def caoSpider(self):
+        print('b')
+        for page in range(self.begin_page, self.end_page + 1):
+            full_url = self.url + str(page)
+            print(full_url)
+            self.load_page(full_url)
+            print('----组合url-----')
+
+    def load_page(self, url):
+        response = requests.get(url, headers=self.ua_header).content
+        # print(response)
+        soup = bs(response, 'lxml')
+        img_url_arr = soup.find_all('a', attrs={'target': '_blank'})
+        # print(img_url_arr)
+        # 去除重复链接
+        img_url_arr = list(set(img_url_arr))
+        for img_url in img_url_arr:
+            ret = self.url1 + img_url['href']
+            # 找到单个链接地址
+            if ret.endswith('html'):
+                print('----调用选择图片地址-----')
+                title = img_url.string
+                print(title)
+                self.load_image(ret, title)
+
+
+            # try:
+            #     self.load_image(ret)
+            #
+            # except Exception:
+            #     pass
+
+    def load_image(self, url,title):
+        response = requests.get(url, headers=self.ua_header).content
+        # print(response)
+        soup = bs(response, 'lxml')
+        img_url_arr = soup.find_all('input', attrs={'type': 'image'})
+        img_url_arr = list(set(img_url_arr))
+        for img_url in img_url_arr:
+            try:
+                ret = img_url['data-src']
+                # print(ret)
+                file_name = ret.split(r'/')[-1]
+                # print(file_name)
+                # print(ret)
+                self.writeimage(ret, file_name, title)
+                print('----图片写入本地-----')
+            except Exception:
+                pass
+
+
+
+    def writeimage(self, url, filename, title):
+        # print('正在保存' + str(filename))
+        file_paths = file_path+'/'+ title
+        if not os.path.exists(file_paths):
+            os.mkdir(file_paths)
+        os.chdir(file_paths)
+        # file = open(str(filename), 'wb')
+        # images = requests.get(url, headers=self.ua_header).content
+        # file.write(images)
+        # file.close()
+        with open(file_paths+'/'+str(filename), 'wb') as f:
+            images = requests.get(url, headers=self.ua_header).content
+            f.write(images)
+        # self.image_name += 1
+        # print(self.image_name)
+
+
+if __name__ == '__main__':
+    app = Spider()
+    app.caoSpider()
